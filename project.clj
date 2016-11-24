@@ -1,4 +1,4 @@
-(defproject jfigueroama/watch "1.0.0"
+(defproject jfigueroama/watch "0.1.0"
   :description "Helper functions and macros to create a reloaded environment. Based on Hawk."
   :url "http://github.com/jfigueroama/watch"
   :license {:name "BSD 2-Clause License"
