@@ -8,16 +8,13 @@ to observe files and do things when they changes.
 
 ## Usage
 
-For now, please see the docs in the functions.
+For now, please see the docs in the functions or explore the source code.
 
 ```clojure
 (require '[watch.core :as watch])
 ; This will reload your some.core every time the source file changes and also will print Hello and Bye.
 (reload (require '[some.core :as c]) "./src/some/core..clj" (println "Hello") (println "Bye"))
 ```
-
-For more documentation please see the source code.
-
 ## License
 
 Copyright © 2016 José Figueroa Martínez
