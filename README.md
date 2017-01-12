@@ -1,4 +1,4 @@
-# watcht
+# watch
 
 Little library based on Hawk to reload namespaces when a file is modified.
 It helps during development time. Also it includes other basic functions
@@ -10,8 +10,13 @@ to observe files and do things when they changes.
 
 For now, please see the docs in the functions.
 
-TODO: Write this.
+```clojure
+(require '[watch.core :as watch])
+; This will reload your some.core every time the source file changes and also will print Hello and Bye.
+(reload (require '[some.core :as c]) "./src/some/core..clj" (println "Hello") (println "Bye"))
+```
 
+For more documentation please see the source code.
 
 ## License
 
