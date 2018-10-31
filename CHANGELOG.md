@@ -1,3 +1,9 @@
+## [0.3.0] - 2018-10-31
+### Released
+#### BREAKING CHANGE
+- This is for better :-)
+  The `reload` function now takes care of finding the filename to watch and assambling the whole `require` and `require ... :reload` flow.
+
 ## [0.2.1] - 2018-10-31
 ### Released
 - Added some messages when trying to watch a file that do not exists. Also it throws and exception.

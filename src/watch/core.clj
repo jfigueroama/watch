@@ -1,7 +1,8 @@
 (ns watch.core
   "Allos you to (mainly) reload your namespaces in an simple way or do other
   things when your files are modified."
-  (:require [hawk.core :as hawk])
+  (:require [hawk.core :as hawk]
+            [clojure.string :as st])
   (:import [java.io File]))
 
 (defonce watched-files (atom {}))
@@ -112,23 +113,50 @@
     (swap! watched-files #(assoc % f (watch-entry f watcher)))
     f))
 
-(defmacro reload
-  "Reload a namespace every time a file is modified. It can also dispatch
-   multiple actions. The macro returns the watch descriptor alone.
-   If the reloading fails the actions are not executed.
-  
-  Ej.
-  (def b
-     (reload (require '[clojure.string :as st])
-             \"t.clj\" (println \"hola\") (println \"adios\")))"
-  [rou file & actions]
-  (let [rrou (seq (conj (vec rou) :reload))
-        prrou (list 'println (list 'quote rou))]
-    `(do
-       ~rrou
-       (watch ~file (fn [ctx# e#]
-                      ~rrou
-                      ~prrou
-                      ~@actions)))))
 
+(defn ns-to-filename
+  [require-def options]
+  (let [extension    (or (if (:ext options) (name (:ext options)))
+                         "clj")
+        src-dir      (or (:src options) "src")
+
+        myns       (str (first require-def))
+        cleaned-ns (clojure.string/replace myns #"-" "_")
+        path-ns    (st/join (java.io.File/separator)
+                            (concat [src-dir] (st/split cleaned-ns #"\.")))
+        file-name  (str path-ns "." extension)]
+    file-name))
+
+(defmacro reload
+  "Load and reload a namespace using a namespace definition and optional parameters and actions.
+  It executes all actions every time the namespace file changes, and prints \"Reloading \" with your namespace definition.
+  It uses 'require' to do the job and if you are having trouble you can use macroexpand-1 too see if it is generating the
+  correct file name to watch.
+  
+  (reload [watch.test-ns :as tns])
+  (reload [watch.test-ns :as tns] {:ext :cljs :src \"opt-src\"})
+  (reload [watch.test-ns :as tns] (println :a) (println :b))
+  (reload [watch.test-ns :as tns] {:ext :cljs :src \"opt-src\"} (println :b) (println :c))"
+  [require-def & actions]
+  (if (vector? require-def)
+    (let [faction   (first actions)
+          commands  (if (map? faction) (rest actions) actions)
+          options   (if (map? faction) faction {})
+          file-name (ns-to-filename require-def options)]
+      (let [rrou1 `(require (quote ~require-def))
+            rroun `(require (quote ~require-def) :reload)
+           prrou  `(println "Reloading " (quote ~require-def))]
+       `(do
+          ~rrou1
+          (watch ~file-name (fn [ctx# e#]
+                              ~rroun
+                              ~prrou
+                              ~@commands)))))))
+
+(comment
+  (short-reload [watch.test-ns :as tns] (println "holja"))
+  (short-reload [watch.test-ns :as tns])
+  (short-reload [watch.test-ns :as tns] {:ext "cljs"})
+  (short-reload [watch.test-ns :as tns] {:ext :cljs :src "opt-src"})
+  )
 
