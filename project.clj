@@ -1,4 +1,4 @@
-(defproject jfigueroama/watch "0.2.0"
+(defproject jfigueroama/watch "0.2.1"
   :description "Helper functions and macros to create a reloaded environment. Based on Hawk for Clojure and Nodejs for Clojurescript."
   :url "http://github.com/jfigueroama/watch"
   :license {:name "BSD 2-Clause License"

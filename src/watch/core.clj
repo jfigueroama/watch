@@ -1,11 +1,20 @@
 (ns watch.core
   "Allos you to (mainly) reload your namespaces in an simple way or do other
   things when your files are modified."
-  (:require [hawk.core :as hawk]))
+  (:require [hawk.core :as hawk])
+  (:import [java.io File]))
 
-(def watched-files "Descriptors." (atom {}))
+(defonce watched-files (atom {}))
 (def enough-millis 1000)
 (def waiting-millis 300)
+
+
+(defn ensure-file
+  ""
+  [f]
+  (if (not (.exists (File. f)))
+    (throw (Exception.
+             (str "File '" f "' doesn't exists and can't be watched!")))))
 
 (defn now
   []
@@ -20,18 +29,26 @@
 (defn watched
   "Return the watched file names from the user hashmap."
   []
-  (keys @watched-files))
+  (set (keys @watched-files)))
+
+(defn watched?
+  "Tells if a file is being watched."
+  [f]
+  (some? (get (watched) f)))
 
 (defn stop
   "Stop a watch using the watch descriptor or using
   a hashmap of descriptors (gotten from watch fn) and
   the file name to stop watching." 
   [f]
-  (if-let [entry (get @watched-files f)]
-    (do
-      (hawk/stop! (:descriptor entry))
-      (swap! watched-files #(dissoc % f))
-      f)))
+  (ensure-file f)
+  (let [entry (get @watched-files f)]
+    (if entry
+      (do
+        (hawk/stop! (:descriptor entry))
+        (swap! watched-files dissoc f)
+        (println "watched: " @watched-files)
+        f))))
 
 (defn stop-all
   "Stop all watching from a hashmap of descriptors."
@@ -43,6 +60,8 @@
   "Observes all events from file name and print it on the console.
    Return the watch descriptor."
   [f]
+  (if (watched? f)
+    (ensure-file f))
   (let [watcher (hawk/watch!
                   [{:paths [f]
                     :context (constantly 0)
@@ -69,6 +88,7 @@
   (watch \"test.clj\" (fn wtestwt [ctx e] nil))
   "
   [f hn]
+  (ensure-file f)
   (stop f)
   (let [watcher
         (hawk/watch!

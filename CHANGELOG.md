@@ -1,3 +1,8 @@
+## [0.2.1] - 2018-10-31
+### Released
+- Added some messages when trying to watch a file that do not exists. Also it throws and exception.
+- Added a test-ns to test things manually.
+
 ## [0.2.0] - 2018-01-23
 ### Released
 - Functionality for clojurescript over nodejs or lumo.
